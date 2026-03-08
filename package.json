@@ -5,7 +5,7 @@
   "main": "server/app.js",
   "bin": {
     "dev-ai": "bin/index.js",
-    "aionix": "./bin/aionix.cmd"
+    "aionix": "./bin/index.js"
   },
   "files": [
     "bin/",
