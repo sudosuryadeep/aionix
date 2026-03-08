@@ -93,6 +93,7 @@ router.post('/image', async (req, res) => {
 });
 
 // POST /api/ai/numinfo
+// POST /api/ai/numinfo
 router.post('/numinfo', async (req, res) => {
   try {
     const { number } = req.body;
@@ -103,12 +104,13 @@ router.post('/numinfo', async (req, res) => {
 
     const data = await request('/api/numinfo', { number: cleaned });
     res.json({
-      name:    data.name    || null,
-      fname:   data.fname   || null,
-      circle:  data.circle  || null,
-      address: data.address || null,
-      alt:     data.alt     || null,
-      id:      data.id      || null
+      mobile:    data.mobile            || null,
+      name:      data.name              || null,
+      fname:     data.fname             || null,
+      circle:    data.circle            || null,
+      address:   data.address           || null,
+      alt:       data.alt               || null,
+      remaining: data.remaining_lookups ?? null
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
