@@ -136,13 +136,14 @@ async function main() {
 
   await showPortTable(config.port || 3000);
 
-  const stopSpin = spinner('Starting AIONIX server...');
-  await sleep(600);
-  stopSpin();
-
   process.env.AIONIX_PORT = config.port || 3000;
   process.env.AIONIX_AUTO_OPEN = config.autoOpen !== false ? 'true' : 'false';
   process.env.AIONIX_NAME = config.name || 'Developer';
+
+  const stopSpin = spinner('Starting AIONIX server...');
+  await sleep(500);
+  stopSpin();
+  console.log();
 
   require('../server/app');
 }
