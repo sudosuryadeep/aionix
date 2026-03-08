@@ -2,7 +2,7 @@
   "name": "aionix",
   "version": "1.0.11",
   "description": "Offline Developer Toolkit - Learning, Tools & Productivity",
-  "main": "server/app.js",
+  "main": "lib/index.js",
   "bin": {
     "aionix": "bin/index.js"
   },

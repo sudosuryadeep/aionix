@@ -1,91 +1,153 @@
-
+#!/usr/bin/env node
 'use strict';
 
 const chalk = require('chalk');
-const readline = require('readline');
+const net = require('net');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const CONFIG_DIR = path.join(os.homedir(), '.aionix');
-const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
+const CONFIG_FILE = path.join(os.homedir(), '.aionix', 'config.json');
 
-console.log(chalk.cyan.bold(`
-+==============================+
-|        🚀 AIONIX             |
-|  Offline Developer Toolkit   |
-+==============================+
-`));
-
-console.log(chalk.green('✅ AIONIX successfully installed!\n'));
-
-let config = {};
+let config = { name: 'Developer', port: 3000, autoOpen: true };
 try {
   if (fs.existsSync(CONFIG_FILE)) {
     config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
   }
 } catch(e) {}
 
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-function question(q) {
-  return new Promise(resolve => rl.question(q, resolve));
+// ═══════════════════════════════════════════
+//  NEON ASCII BANNER
+// ═══════════════════════════════════════════
+function showBanner() {
+  console.clear();
+  console.log(chalk.hex('#00ff9f').bold(`
+  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+  ░                                                ░
+  ░    ██████╗ ██╗ ██████╗ ███╗   ██╗██╗██╗  ██╗  ░
+  ░   ██╔══██╗██║██╔═══██╗████╗  ██║██║╚██╗██╔╝  ░
+  ░   ███████║██║██║   ██║██╔██╗ ██║██║ ╚███╔╝   ░
+  ░   ██╔══██║██║██║   ██║██║╚██╗██║██║ ██╔██╗   ░
+  ░   ██║  ██║██║╚██████╔╝██║ ╚████║██║██╔╝ ██╗  ░
+  ░   ╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝  ░
+  ░                                                ░
+  ░         OFFLINE  DEVELOPER  TOOLKIT            ░
+  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░`));
+
+  console.log(chalk.hex('#00ff9f')(`  ╔${'═'.repeat(50)}╗`));
+  console.log(chalk.hex('#00ff9f')(`  ║`) + chalk.hex('#ffffff')(`  👾 Welcome back, `) + chalk.hex('#ffff00').bold(`${config.name}`.padEnd(29)) + chalk.hex('#00ff9f')(`║`));
+  console.log(chalk.hex('#00ff9f')(`  ║`) + chalk.hex('#888888')(`  v1.2.0  ·  AI Chat  ·  Image Gen  ·  Tools  `) + chalk.hex('#00ff9f')(` ║`));
+  console.log(chalk.hex('#00ff9f')(`  ╚${'═'.repeat(50)}╝`));
+  console.log();
 }
 
-async function setup() {
-  console.log(chalk.yellow('⚙️  Quick Setup\n'));
+// ═══════════════════════════════════════════
+//  ASCII LOADING BAR
+// ═══════════════════════════════════════════
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-  const name = await question(chalk.white('👤 Your name: '));
-  const port = await question(chalk.white('🔌 Preferred port (default 3000): '));
-  const alias = await question(chalk.white('⚡ Custom command alias (default: aionix): '));
-  const autoOpen = await question(chalk.white('🌐 Auto open browser on start? (y/n, default y): '));
-
-  const finalPort = port.trim() || '3000';
-  const finalAlias = alias.trim() || 'aionix';
-  const finalName = name.trim() || 'Developer';
-  const finalAutoOpen = autoOpen.trim().toLowerCase() !== 'n';
-
-  config = {
-    name: finalName,
-    port: parseInt(finalPort),
-    alias: finalAlias,
-    autoOpen: finalAutoOpen,
-    installedAt: new Date().toISOString()
-  };
-
-  if (!fs.existsSync(CONFIG_DIR)) fs.mkdirSync(CONFIG_DIR, { recursive: true });
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
-
-  console.log(chalk.green('\n✅ Config saved!'));
-  console.log(chalk.gray(`📁 ${CONFIG_FILE}\n`));
-
-  if (finalAlias !== 'aionix') {
-    console.log(chalk.yellow(`💡 To use "${finalAlias}" as your command:`));
-    const isWindows = process.platform === 'win32';
-    if (isWindows) {
-      console.log(chalk.cyan(`   doskey ${finalAlias}=aionix`));
-      console.log(chalk.gray('   (Run in terminal or add to AutoRun registry)\n'));
-    } else {
-      console.log(chalk.cyan(`   echo "alias ${finalAlias}='aionix'" >> ~/.bashrc && source ~/.bashrc\n`));
-    }
+async function loadingBar(label, duration = 800) {
+  const width = 30;
+  process.stdout.write(`  ${chalk.hex('#888888')(label.padEnd(20))} [`);
+  for (let i = 0; i <= width; i++) {
+    const filled = chalk.hex('#00ff9f')('█'.repeat(i));
+    const empty = chalk.hex('#333333')('░'.repeat(width - i));
+    const pct = Math.round((i / width) * 100);
+    process.stdout.write(`\r  ${chalk.hex('#888888')(label.padEnd(20))} [${filled}${empty}] ${chalk.hex('#ffff00')(pct + '%')}`);
+    await sleep(duration / width);
   }
+  process.stdout.write(`\r  ${chalk.hex('#00ff9f')(label.padEnd(20))} [${'█'.repeat(width)}] ${chalk.hex('#00ff9f')('DONE ✓')}\n`);
+}
 
-  rl.close();
+// ═══════════════════════════════════════════
+//  SPINNER
+// ═══════════════════════════════════════════
+function spinner(label) {
+  const frames = ['⠋','⠙','⠹','⠸','⠼','⠴','⠦','⠧','⠇','⠏'];
+  let i = 0;
+  const id = setInterval(() => {
+    process.stdout.write(`\r  ${chalk.hex('#00ff9f')(frames[i])} ${chalk.hex('#888888')(label)}`);
+    i = (i + 1) % frames.length;
+  }, 80);
+  return () => {
+    clearInterval(id);
+    process.stdout.write(`\r  ${chalk.hex('#00ff9f')('✓')} ${chalk.hex('#ffffff')(label)}\n`);
+  };
+}
 
-  // Ask to launch now
-  const rl2 = readline.createInterface({ input: process.stdin, output: process.stdout });
-  rl2.question(chalk.yellow(`🚀 Launch AIONIX now? (y/n, default y): `), (ans) => {
-    rl2.close();
-    if (ans.trim().toLowerCase() !== 'n') {
-      console.log(chalk.green('\nStarting server...'));
-      process.env.AIONIX_PORT = config.port || 3000;
-      process.env.AIONIX_AUTO_OPEN = config.autoOpen ? 'true' : 'false';
-      require('../server/app');
-    } else {
-      console.log(chalk.cyan('\n👉 Run anytime:'), chalk.white.bold('aionix'));
-      console.log(chalk.cyan('⚙️  Edit config:'), chalk.white.bold('aionix --config\n'));
-      process.exit(0);
-    }
+// ═══════════════════════════════════════════
+//  PORT CHECK
+// ═══════════════════════════════════════════
+async function checkPort(port) {
+  return new Promise((resolve) => {
+    const s = net.createServer();
+    s.listen(port, () => { s.close(() => resolve(false)); });
+    s.on('error', () => resolve(true));
   });
 }
 
-setup().catch(e => { console.error(e); rl.close(); process.exit(1); });
+async function showPortTable(preferredPort) {
+  console.log(chalk.hex('#00ff9f')(`  ┌─────────────────────────────┐`));
+  console.log(chalk.hex('#00ff9f')(`  │`) + chalk.hex('#ffff00').bold(`   📡 PORT STATUS MONITOR     `) + chalk.hex('#00ff9f')(`│`));
+  console.log(chalk.hex('#00ff9f')(`  ├──────────┬──────────────────┤`));
+  console.log(chalk.hex('#00ff9f')(`  │`) + chalk.hex('#888888')(`   PORT   `) + chalk.hex('#00ff9f')(`│`) + chalk.hex('#888888')(`     STATUS         `) + chalk.hex('#00ff9f')(`│`));
+  console.log(chalk.hex('#00ff9f')(`  ├──────────┼──────────────────┤`));
+
+  const ports = [preferredPort, preferredPort+1, preferredPort+2, preferredPort+3];
+  for (const p of ports) {
+    const inUse = await checkPort(p);
+    const portStr = String(p).padEnd(6);
+    const status = inUse
+      ? chalk.hex('#ff4444')('● IN USE          ')
+      : chalk.hex('#00ff9f')('○ FREE            ');
+    const star = p === preferredPort ? chalk.hex('#ffff00')(' ◄') : '  ';
+    console.log(chalk.hex('#00ff9f')(`  │`) + `   ${chalk.hex('#ffffff')(portStr)}` + chalk.hex('#00ff9f')(`│`) + `  ${status}` + chalk.hex('#00ff9f')(`│`) + star);
+  }
+  console.log(chalk.hex('#00ff9f')(`  └──────────┴──────────────────┘`));
+  console.log();
+}
+
+// ═══════════════════════════════════════════
+//  --config FLAG
+// ═══════════════════════════════════════════
+if (process.argv.includes('--config')) {
+  showBanner();
+  console.log(chalk.hex('#00ff9f')(`  ┌─────────────────────────────────────┐`));
+  console.log(chalk.hex('#00ff9f')(`  │`) + chalk.hex('#ffff00').bold(`   ⚙️  CURRENT CONFIG                `) + chalk.hex('#00ff9f')(`│`));
+  console.log(chalk.hex('#00ff9f')(`  ├─────────────────────────────────────┤`));
+  Object.entries(config).forEach(([k, v]) => {
+    console.log(chalk.hex('#00ff9f')(`  │`) + `  ${chalk.hex('#888888')(k.padEnd(15))} ${chalk.hex('#ffffff')(String(v).padEnd(20))}` + chalk.hex('#00ff9f')(`│`));
+  });
+  console.log(chalk.hex('#00ff9f')(`  └─────────────────────────────────────┘`));
+  console.log(chalk.hex('#888888')(`\n  📁 ${CONFIG_FILE}\n`));
+  process.exit(0);
+}
+
+// ═══════════════════════════════════════════
+//  MAIN
+// ═══════════════════════════════════════════
+async function main() {
+  showBanner();
+
+  await loadingBar('Initializing', 400);
+  await loadingBar('Loading modules', 300);
+  await loadingBar('Checking system', 300);
+  console.log();
+
+  await showPortTable(config.port || 3000);
+
+  const stopSpin = spinner('Starting AIONIX server...');
+  await sleep(600);
+  stopSpin();
+
+  process.env.AIONIX_PORT = config.port || 3000;
+  process.env.AIONIX_AUTO_OPEN = config.autoOpen !== false ? 'true' : 'false';
+  process.env.AIONIX_NAME = config.name || 'Developer';
+
+  require('../server/app');
+}
+
+main().catch(e => {
+  console.error(chalk.hex('#ff4444')('\n  ✗ Error: ' + e.message));
+  process.exit(1);
+});
