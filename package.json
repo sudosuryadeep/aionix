@@ -1,6 +1,6 @@
 {
   "name": "goodai",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Offline Developer Toolkit - Learning, Tools & Productivity",
   "main": "lib/index.js",
   "bin": {
