@@ -1042,7 +1042,11 @@ async function lookupNumber() {
     const data = await res.json();
     if(data.error) throw new Error(data.error);
 
-    result.innerHTML = `
+    const cleanAddr = data.address
+      ? data.address.replace(/!+/g, ', ').replace(/^,\s*/, '').replace(/,\s*,/g, ',').trim()
+      : null;
+
+result.innerHTML = `
   <div class="numinfo-result">
     <div class="numinfo-header">
       <span style="font-size:24px">👤</span>
@@ -1050,13 +1054,14 @@ async function lookupNumber() {
         <div style="font-family:'Orbitron',monospace;font-size:13px;color:var(--neon)">LOOKUP RESULT</div>
         <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${num}</div>
       </div>
+      ${data.remaining != null ? `<span style="margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--yellow);border:1px solid rgba(255,255,0,0.3);padding:3px 8px;border-radius:3px">⚡ ${data.remaining} left today</span>` : ''}
     </div>
     ${data.name    ? `<div class="numinfo-row"><span class="numinfo-key">Name</span><span class="numinfo-val">${escHtml(data.name)}</span></div>` : ''}
     ${data.fname   ? `<div class="numinfo-row"><span class="numinfo-key">Father</span><span class="numinfo-val">${escHtml(data.fname)}</span></div>` : ''}
-    ${data.circle  ? `<div class="numinfo-row"><span class="numinfo-key">Circle</span><span class="numinfo-val">${escHtml(data.circle)}</span></div>` : ''}
-    ${data.address ? `<div class="numinfo-row"><span class="numinfo-key">Address</span><span class="numinfo-val" style="font-size:13px;line-height:1.5">${escHtml(data.address)}</span></div>` : ''}
+    ${data.mobile  ? `<div class="numinfo-row"><span class="numinfo-key">Mobile</span><span class="numinfo-val">${escHtml(data.mobile)}</span></div>` : ''}
     ${data.alt     ? `<div class="numinfo-row"><span class="numinfo-key">Alt Number</span><span class="numinfo-val">${escHtml(data.alt)}</span></div>` : ''}
-    ${data.id      ? `<div class="numinfo-row"><span class="numinfo-key">ID</span><span class="numinfo-val" style="font-size:11px;color:var(--text3)">${escHtml(data.id)}</span></div>` : ''}
+    ${data.circle  ? `<div class="numinfo-row"><span class="numinfo-key">Circle</span><span class="numinfo-val">${escHtml(data.circle)}</span></div>` : ''}
+    ${cleanAddr    ? `<div class="numinfo-row"><span class="numinfo-key">Address</span><span class="numinfo-val" style="font-size:13px;line-height:1.6">${escHtml(cleanAddr)}</span></div>` : ''}
   </div>`;
     showToast('✓ Info found!');
   } catch(e) {
