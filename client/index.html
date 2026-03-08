@@ -1043,18 +1043,21 @@ async function lookupNumber() {
     if(data.error) throw new Error(data.error);
 
     result.innerHTML = `
-      <div class="numinfo-result">
-        <div class="numinfo-header">
-          <span style="font-size:24px">👤</span>
-          <div>
-            <div style="font-family:'Orbitron',monospace;font-size:13px;color:var(--neon)">LOOKUP RESULT</div>
-            <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${num}</div>
-          </div>
-        </div>
-        ${data.name ? `<div class="numinfo-row"><span class="numinfo-key">Name</span><span class="numinfo-val">${escHtml(data.name)}</span></div>` : ''}
-        ${data.fname ? `<div class="numinfo-row"><span class="numinfo-key">Father</span><span class="numinfo-val">${escHtml(data.fname)}</span></div>` : ''}
-        ${data.circle ? `<div class="numinfo-row"><span class="numinfo-key">Circle</span><span class="numinfo-val">${escHtml(data.circle)}</span></div>` : ''}
-      </div>`;
+  <div class="numinfo-result">
+    <div class="numinfo-header">
+      <span style="font-size:24px">👤</span>
+      <div>
+        <div style="font-family:'Orbitron',monospace;font-size:13px;color:var(--neon)">LOOKUP RESULT</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${num}</div>
+      </div>
+    </div>
+    ${data.name    ? `<div class="numinfo-row"><span class="numinfo-key">Name</span><span class="numinfo-val">${escHtml(data.name)}</span></div>` : ''}
+    ${data.fname   ? `<div class="numinfo-row"><span class="numinfo-key">Father</span><span class="numinfo-val">${escHtml(data.fname)}</span></div>` : ''}
+    ${data.circle  ? `<div class="numinfo-row"><span class="numinfo-key">Circle</span><span class="numinfo-val">${escHtml(data.circle)}</span></div>` : ''}
+    ${data.address ? `<div class="numinfo-row"><span class="numinfo-key">Address</span><span class="numinfo-val" style="font-size:13px;line-height:1.5">${escHtml(data.address)}</span></div>` : ''}
+    ${data.alt     ? `<div class="numinfo-row"><span class="numinfo-key">Alt Number</span><span class="numinfo-val">${escHtml(data.alt)}</span></div>` : ''}
+    ${data.id      ? `<div class="numinfo-row"><span class="numinfo-key">ID</span><span class="numinfo-val" style="font-size:11px;color:var(--text3)">${escHtml(data.id)}</span></div>` : ''}
+  </div>`;
     showToast('✓ Info found!');
   } catch(e) {
     result.innerHTML = `<div class="card" style="margin-top:16px;text-align:center;color:var(--red)">✗ ${escHtml(e.message)}</div>`;
