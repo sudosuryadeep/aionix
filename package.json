@@ -10,7 +10,12 @@
     "bin/",
     "server/",
     "client/",
-    "db/"
+    "db/",
+    "bin/",
+    "server/",
+    "client/",
+    "db/",
+    "lib/"
   ],
   "keywords": [
     "developer",
