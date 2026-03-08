@@ -1,11 +1,10 @@
 {
   "name": "aionix",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Offline Developer Toolkit - Learning, Tools & Productivity",
   "main": "server/app.js",
   "bin": {
-    "dev-ai": "bin/index.js",
-    "aionix": "./bin/index.js"
+    "aionix": "bin/index.js"
   },
   "files": [
     "bin/",
