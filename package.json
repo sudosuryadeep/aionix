@@ -1,16 +1,12 @@
 {
   "name": "goodai",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Offline Developer Toolkit - Learning, Tools & Productivity",
   "main": "lib/index.js",
   "bin": {
-    "aionix": "bin/index.js"
+    "goodai": "bin/index.js"
   },
   "files": [
-    "bin/",
-    "server/",
-    "client/",
-    "db/",
     "bin/",
     "server/",
     "client/",
@@ -23,14 +19,16 @@
     "toolkit",
     "cli",
     "learning",
-    "productivity"
+    "productivity",
+    "number-lookup",
+    "ai-chat",
+    "image-gen"
   ],
   "author": "Surya Singh",
   "license": "MIT",
   "dependencies": {
     "chalk": "^4.1.2",
     "express": "^4.18.2",
-    "goodai": "^1.0.0",
     "nedb-promises": "^6.2.1",
     "open": "^8.4.2"
   },
