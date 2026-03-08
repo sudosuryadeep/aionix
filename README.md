@@ -8,8 +8,8 @@
 
 <br/><br/>
 
-[![npm version](https://img.shields.io/npm/v/aionix?style=for-the-badge&color=00ff9f&labelColor=0a0920&label=VERSION&logo=npm&logoColor=white)](https://www.npmjs.com/package/aionix)
-[![npm downloads](https://img.shields.io/npm/dt/aionix?style=for-the-badge&color=00d4ff&labelColor=0a0920&label=DOWNLOADS&logo=npm&logoColor=white)](https://www.npmjs.com/package/aionix)
+[![npm version](https://img.shields.io/npm/v/goodai?style=for-the-badge&color=00ff9f&labelColor=0a0920&label=VERSION&logo=npm&logoColor=white)](https://www.npmjs.com/package/goodai)
+[![npm downloads](https://img.shields.io/npm/dt/aionix?style=for-the-badge&color=00d4ff&labelColor=0a0920&label=DOWNLOADS&logo=npm&logoColor=white)](https://www.npmjs.com/package/goodai)
 [![npm bundle size](https://img.shields.io/bundlephobia/min/aionix?style=for-the-badge&color=ff00aa&labelColor=0a0920&label=SIZE&logoColor=white)](https://bundlephobia.com/package/aionix)
 [![License](https://img.shields.io/npm/l/aionix?style=for-the-badge&color=ffff00&labelColor=0a0920&label=LICENSE&logoColor=white)](./LICENSE)
 [![Node](https://img.shields.io/node/v/aionix?style=for-the-badge&color=00ff9f&labelColor=0a0920&label=NODE&logo=nodedotjs&logoColor=white)](https://nodejs.org)
