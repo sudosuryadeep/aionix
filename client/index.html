@@ -1,0 +1,1615 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DEV-AI — Offline Developer Toolkit</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0a0a0f;
+        --bg2: #111118;
+        --bg3: #1a1a24;
+        --border: #2a2a3a;
+        --accent: #00f5c4;
+        --accent2: #7c3aed;
+        --accent3: #f59e0b;
+        --red: #ef4444;
+        --text: #e2e8f0;
+        --text2: #94a3b8;
+        --text3: #475569;
+        --card: #13131c;
+        --glow: 0 0 20px rgba(0, 245, 196, 0.15);
+      }
+
+      body {
+        font-family: "Syne", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Animated background grid */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(0, 245, 196, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 245, 196, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* SIDEBAR */
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 220px;
+        background: var(--bg2);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        z-index: 100;
+        padding: 0;
+      }
+
+      .logo {
+        padding: 24px 20px 20px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .logo-text {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--accent);
+        text-shadow: var(--glow);
+      }
+
+      .logo-sub {
+        font-size: 10px;
+        font-family: "JetBrains Mono", monospace;
+        color: var(--text3);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-top: 2px;
+      }
+
+      .nav {
+        padding: 16px 10px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text2);
+        transition: all 0.2s;
+        border: 1px solid transparent;
+        letter-spacing: 0.3px;
+      }
+
+      .nav-item:hover {
+        background: var(--bg3);
+        color: var(--text);
+      }
+
+      .nav-item.active {
+        background: rgba(0, 245, 196, 0.08);
+        color: var(--accent);
+        border-color: rgba(0, 245, 196, 0.2);
+      }
+
+      .nav-icon {
+        font-size: 16px;
+      }
+
+      .sidebar-footer {
+        padding: 16px 20px;
+        border-top: 1px solid var(--border);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: var(--text3);
+      }
+
+      .status-dot {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        background: var(--accent);
+        border-radius: 50%;
+        margin-right: 6px;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      /* MAIN CONTENT */
+      .main {
+        margin-left: 220px;
+        min-height: 100vh;
+        position: relative;
+        z-index: 1;
+      }
+
+      .topbar {
+        padding: 20px 32px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(10, 10, 15, 0.8);
+        backdrop-filter: blur(10px);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .page-title {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.3px;
+      }
+
+      .page-title span {
+        color: var(--accent);
+      }
+
+      .content {
+        padding: 32px;
+      }
+
+      /* TABS */
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* CARDS */
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        transition: border-color 0.2s;
+      }
+
+      .card:hover {
+        border-color: rgba(0, 245, 196, 0.3);
+      }
+
+      .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+
+      .card-title {
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text2);
+      }
+
+      /* GRID LAYOUTS */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 16px;
+      }
+
+      /* INPUTS */
+      input,
+      textarea,
+      select {
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        width: 100%;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(0, 245, 196, 0.1);
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 120px;
+      }
+
+      .form-group {
+        margin-bottom: 14px;
+      }
+      .form-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text3);
+        margin-bottom: 6px;
+      }
+
+      /* BUTTONS */
+      .btn {
+        padding: 9px 18px;
+        border-radius: 8px;
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 13px;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s;
+        letter-spacing: 0.3px;
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: #000;
+      }
+
+      .btn-primary:hover {
+        background: #00ddb0;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(0, 245, 196, 0.3);
+      }
+
+      .btn-ghost {
+        background: transparent;
+        color: var(--text2);
+        border: 1px solid var(--border);
+      }
+
+      .btn-ghost:hover {
+        background: var(--bg3);
+        color: var(--text);
+      }
+
+      .btn-danger {
+        background: transparent;
+        color: var(--red);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+      }
+
+      .btn-danger:hover {
+        background: rgba(239, 68, 68, 0.1);
+      }
+
+      .btn-sm {
+        padding: 6px 12px;
+        font-size: 11px;
+      }
+
+      /* TAGS */
+      .tag {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      .tag-js {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--accent3);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+      }
+      .tag-react {
+        background: rgba(56, 189, 248, 0.15);
+        color: #38bdf8;
+        border: 1px solid rgba(56, 189, 248, 0.3);
+      }
+      .tag-css {
+        background: rgba(124, 58, 237, 0.15);
+        color: #a78bfa;
+        border: 1px solid rgba(124, 58, 237, 0.3);
+      }
+      .tag-node {
+        background: rgba(0, 245, 196, 0.1);
+        color: var(--accent);
+        border: 1px solid rgba(0, 245, 196, 0.25);
+      }
+      .tag-default {
+        background: var(--bg3);
+        color: var(--text2);
+        border: 1px solid var(--border);
+      }
+
+      /* ===== DASHBOARD ===== */
+      .stat-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+      }
+
+      .stat-card.green::before {
+        background: var(--accent);
+      }
+      .stat-card.purple::before {
+        background: var(--accent2);
+      }
+      .stat-card.yellow::before {
+        background: var(--accent3);
+      }
+      .stat-card.red::before {
+        background: var(--red);
+      }
+
+      .stat-num {
+        font-size: 36px;
+        font-weight: 800;
+        line-height: 1;
+        margin: 8px 0 4px;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        color: var(--text3);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .stat-icon {
+        font-size: 24px;
+        margin-bottom: 4px;
+      }
+
+      /* ===== SNIPPETS ===== */
+      .snippet-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.2s;
+      }
+
+      .snippet-card:hover {
+        border-color: rgba(0, 245, 196, 0.3);
+        transform: translateY(-2px);
+      }
+
+      .snippet-header {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--bg3);
+      }
+
+      .snippet-title {
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .snippet-code {
+        padding: 16px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--accent);
+        background: #0d0d14;
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 160px;
+        overflow-y: auto;
+      }
+
+      .snippet-footer {
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      /* ===== QUIZ ===== */
+      .quiz-topic-btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--text);
+        cursor: pointer;
+        font-family: "Syne", sans-serif;
+        font-weight: 600;
+        font-size: 13px;
+        transition: all 0.2s;
+      }
+
+      .quiz-topic-btn:hover,
+      .quiz-topic-btn.selected {
+        background: rgba(0, 245, 196, 0.08);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .question-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 28px;
+      }
+
+      .question-text {
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 1.5;
+        margin-bottom: 24px;
+      }
+
+      .option-btn {
+        display: block;
+        width: 100%;
+        padding: 14px 18px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg3);
+        color: var(--text);
+        text-align: left;
+        cursor: pointer;
+        font-family: "Syne", sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+
+      .option-btn:hover:not(:disabled) {
+        border-color: var(--accent);
+        background: rgba(0, 245, 196, 0.06);
+      }
+      .option-btn.correct {
+        background: rgba(0, 245, 196, 0.12);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .option-btn.wrong {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: var(--red);
+        color: var(--red);
+      }
+
+      .score-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: rgba(0, 245, 196, 0.1);
+        border: 1px solid rgba(0, 245, 196, 0.3);
+        border-radius: 20px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        color: var(--accent);
+      }
+
+      /* ===== HABITS ===== */
+      .habit-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 10px;
+        transition: all 0.2s;
+      }
+
+      .habit-row:hover {
+        border-color: rgba(0, 245, 196, 0.2);
+      }
+
+      .habit-name {
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .habit-freq {
+        font-size: 11px;
+        color: var(--text3);
+        font-family: "JetBrains Mono", monospace;
+        margin-top: 2px;
+      }
+
+      .streak-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: 20px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        color: var(--accent3);
+      }
+
+      .done-badge {
+        background: rgba(0, 245, 196, 0.1);
+        border-color: rgba(0, 245, 196, 0.3);
+        color: var(--accent);
+      }
+
+      /* ===== DOCS ===== */
+      .docs-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .docs-lang-btn {
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--text2);
+        cursor: pointer;
+        font-family: "Syne", sans-serif;
+        font-weight: 600;
+        font-size: 13px;
+        text-align: left;
+        transition: all 0.2s;
+        text-transform: capitalize;
+      }
+
+      .docs-lang-btn:hover,
+      .docs-lang-btn.active {
+        background: rgba(0, 245, 196, 0.08);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .doc-item {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 12px;
+        transition: border-color 0.2s;
+      }
+
+      .doc-item:hover {
+        border-color: rgba(0, 245, 196, 0.3);
+      }
+      .doc-item-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--accent);
+        margin-bottom: 8px;
+      }
+      .doc-item-content {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        line-height: 1.7;
+        color: var(--text2);
+      }
+
+      /* ===== PLAYGROUND ===== */
+      .playground-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        height: calc(100vh - 180px);
+      }
+
+      .playground-panel {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .panel-header {
+        padding: 12px 16px;
+        background: var(--bg3);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text3);
+      }
+
+      .code-editor {
+        flex: 1;
+        background: #0d0d14;
+        border: none;
+        color: #a8ff78;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        line-height: 1.7;
+        padding: 20px;
+        resize: none;
+        outline: none;
+      }
+
+      .output-frame {
+        flex: 1;
+        border: none;
+        background: white;
+      }
+
+      /* EMPTY STATE */
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text3);
+      }
+
+      .empty-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+      }
+      .empty-text {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text2);
+        margin-bottom: 6px;
+      }
+      .empty-sub {
+        font-size: 13px;
+      }
+
+      /* MODAL */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(4px);
+        z-index: 200;
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-overlay.open {
+        display: flex;
+      }
+
+      .modal {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px;
+        width: 500px;
+        max-width: 90vw;
+        animation: slideUp 0.3s ease;
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .modal-title {
+        font-size: 18px;
+        font-weight: 800;
+        margin-bottom: 20px;
+      }
+
+      /* TOAST */
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: var(--bg2);
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        font-family: "JetBrains Mono", monospace;
+        z-index: 999;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s;
+        pointer-events: none;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* SCROLLBAR */
+      ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 2px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--text3);
+      }
+
+      .flex {
+        display: flex;
+      }
+      .gap-2 {
+        gap: 8px;
+      }
+      .gap-3 {
+        gap: 12px;
+      }
+      .mb-4 {
+        margin-bottom: 16px;
+      }
+      .mb-6 {
+        margin-bottom: 24px;
+      }
+      .mt-4 {
+        margin-top: 16px;
+      }
+      .flex-wrap {
+        flex-wrap: wrap;
+      }
+      .items-center {
+        align-items: center;
+      }
+      .justify-between {
+        justify-content: space-between;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-text">DEV-AI</div>
+        <div class="logo-sub">Offline Toolkit</div>
+      </div>
+      <nav class="nav">
+        <div class="nav-item active" onclick="switchTab('dashboard')">
+          <span class="nav-icon">⚡</span> Dashboard
+        </div>
+        <div class="nav-item" onclick="switchTab('snippets')">
+          <span class="nav-icon">📦</span> Snippets
+        </div>
+        <div class="nav-item" onclick="switchTab('quiz')">
+          <span class="nav-icon">🧠</span> Quiz
+        </div>
+        <div class="nav-item" onclick="switchTab('habits')">
+          <span class="nav-icon">🔥</span> Habits
+        </div>
+        <div class="nav-item" onclick="switchTab('docs')">
+          <span class="nav-icon">📖</span> Docs
+        </div>
+        <div class="nav-item" onclick="switchTab('playground')">
+          <span class="nav-icon">🎮</span> Playground
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <span class="status-dot"></span> offline mode
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <div class="topbar">
+        <div class="page-title" id="pageTitle">⚡ <span>Dashboard</span></div>
+        <div
+          style="
+            font-family: &quot;JetBrains Mono&quot;, monospace;
+            font-size: 11px;
+            color: var(--text3);
+          "
+          id="currentTime"
+        ></div>
+      </div>
+
+      <div class="content">
+        <!-- DASHBOARD -->
+        <div class="tab-content active" id="tab-dashboard">
+          <div class="grid-3 mb-6" id="statsGrid">
+            <div class="stat-card green">
+              <div class="stat-icon">📦</div>
+              <div class="stat-num" id="stat-snippets">0</div>
+              <div class="stat-label">Snippets Saved</div>
+            </div>
+            <div class="stat-card yellow">
+              <div class="stat-icon">🔥</div>
+              <div class="stat-num" id="stat-habits">0</div>
+              <div class="stat-label">Active Habits</div>
+            </div>
+            <div class="stat-card purple">
+              <div class="stat-icon">🧠</div>
+              <div class="stat-num" id="stat-score">0%</div>
+              <div class="stat-label">Quiz Accuracy</div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Quick Actions</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px">
+                <button
+                  class="btn btn-ghost"
+                  style="
+                    justify-content: flex-start;
+                    display: flex;
+                    gap: 10px;
+                    align-items: center;
+                  "
+                  onclick="
+                    switchTab('snippets');
+                    openSnippetModal();
+                  "
+                >
+                  <span>📦</span> Save a code snippet
+                </button>
+                <button
+                  class="btn btn-ghost"
+                  style="
+                    justify-content: flex-start;
+                    display: flex;
+                    gap: 10px;
+                    align-items: center;
+                  "
+                  onclick="switchTab('quiz')"
+                >
+                  <span>🧠</span> Practice quiz
+                </button>
+                <button
+                  class="btn btn-ghost"
+                  style="
+                    justify-content: flex-start;
+                    display: flex;
+                    gap: 10px;
+                    align-items: center;
+                  "
+                  onclick="switchTab('playground')"
+                >
+                  <span>🎮</span> Open playground
+                </button>
+                <button
+                  class="btn btn-ghost"
+                  style="
+                    justify-content: flex-start;
+                    display: flex;
+                    gap: 10px;
+                    align-items: center;
+                  "
+                  onclick="switchTab('habits')"
+                >
+                  <span>🔥</span> Track a habit
+                </button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Today's Habits</div>
+              </div>
+              <div id="dashHabits">
+                <div class="empty-state" style="padding: 20px">
+                  <div class="empty-icon">🔥</div>
+                  <div class="empty-text">No habits yet</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SNIPPETS -->
+        <div class="tab-content" id="tab-snippets">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex gap-2">
+              <input
+                type="text"
+                id="searchSnippets"
+                placeholder="Search snippets..."
+                style="width: 240px"
+                oninput="filterSnippets()"
+              />
+              <select
+                id="filterLang"
+                onchange="filterSnippets()"
+                style="width: 140px"
+              >
+                <option value="">All Languages</option>
+                <option>JavaScript</option>
+                <option>Python</option>
+                <option>React</option>
+                <option>CSS</option>
+                <option>Node.js</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="openSnippetModal()">
+              + New Snippet
+            </button>
+          </div>
+          <div id="snippetsList" class="grid-2"></div>
+        </div>
+
+        <!-- QUIZ -->
+        <div class="tab-content" id="tab-quiz">
+          <div id="quizTopicSelect">
+            <div class="card mb-6">
+              <div class="card-header">
+                <div class="card-title">Choose Topic</div>
+              </div>
+              <div id="topicButtons" class="flex flex-wrap gap-2"></div>
+            </div>
+          </div>
+          <div id="quizArea" style="display: none">
+            <div class="flex items-center justify-between mb-4">
+              <div class="score-badge">
+                Score: <strong id="quizScore">0</strong> /
+                <span id="quizTotal">0</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="resetQuiz()">
+                ← Back to Topics
+              </button>
+            </div>
+            <div class="question-card" id="questionCard"></div>
+            <div style="text-align: center; margin-top: 20px">
+              <button
+                class="btn btn-primary"
+                id="nextBtn"
+                onclick="nextQuestion()"
+                style="display: none"
+              >
+                Next Question →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- HABITS -->
+        <div class="tab-content" id="tab-habits">
+          <div class="grid-2">
+            <div>
+              <div class="card mb-4">
+                <div class="card-header">
+                  <div class="card-title">Add Habit</div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Habit Name</label>
+                  <input
+                    type="text"
+                    id="habitName"
+                    placeholder="e.g. Code for 1 hour"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Frequency</label>
+                  <select id="habitFreq">
+                    <option>Daily</option>
+                    <option>Weekly</option>
+                    <option>Weekdays only</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary" onclick="addHabit()">
+                  + Add Habit
+                </button>
+              </div>
+            </div>
+            <div>
+              <div id="habitsList"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DOCS -->
+        <div class="tab-content" id="tab-docs">
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">Languages</div>
+                </div>
+                <div class="docs-sidebar" id="docsLangList"></div>
+              </div>
+            </div>
+            <div id="docsContent">
+              <div class="empty-state">
+                <div class="empty-icon">📖</div>
+                <div class="empty-text">Select a language</div>
+                <div class="empty-sub">
+                  Choose from the left to view offline docs
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PLAYGROUND -->
+        <div class="tab-content" id="tab-playground">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex gap-2">
+              <select
+                id="playgroundLang"
+                onchange="updatePlayground()"
+                style="width: 140px"
+              >
+                <option value="html">HTML</option>
+                <option value="js">JavaScript</option>
+              </select>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost btn-sm" onclick="clearPlayground()">
+                Clear
+              </button>
+              <button class="btn btn-primary btn-sm" onclick="runCode()">
+                ▶ Run
+              </button>
+            </div>
+          </div>
+          <div class="playground-grid">
+            <div class="playground-panel">
+              <div class="panel-header">
+                <span>CODE EDITOR</span>
+                <span style="color: var(--accent)" id="langLabel">HTML</span>
+              </div>
+              <textarea
+                class="code-editor"
+                id="codeEditor"
+                placeholder="Write your code here...
+              ></textarea>
+            </div>
+            <div class="playground-panel">
+              <div class="panel-header"><span>OUTPUT</span></div>
+              <iframe
+                class="output-frame"
+                id="outputFrame"
+                sandbox="allow-scripts"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ADD SNIPPET MODAL -->
+    <div class="modal-overlay" id="snippetModal">
+      <div class="modal">
+        <div class="modal-title">📦 New Snippet</div>
+        <div class="form-group">
+          <label class="form-label">Title</label>
+          <input
+            type="text"
+            id="snippetTitle"
+            placeholder="e.g. Debounce function"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Language</label>
+          <select id="snippetLang">
+            <option>JavaScript</option>
+            <option>Python</option>
+            <option>React</option>
+            <option>CSS</option>
+            <option>Node.js</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Code</label>
+          <textarea
+            id="snippetCode"
+            placeholder="Paste your code here..."
+            style="
+              min-height: 160px;
+              font-family: &quot;JetBrains Mono&quot;, monospace;
+              color: var(--accent);
+            "
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tags (comma separated)</label>
+          <input
+            type="text"
+            id="snippetTags"
+            placeholder="e.g. utility, async, array"
+          />
+        </div>
+        <div class="flex gap-2 mt-4">
+          <button class="btn btn-primary" onclick="saveSnippet()">
+            Save Snippet
+          </button>
+          <button class="btn btn-ghost" onclick="closeSnippetModal()">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+      const API = "";
+      let quizQuestions = [];
+      let currentQ = 0;
+      let score = 0;
+      let answered = false;
+
+      // ===== UTILS =====
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 2500);
+      }
+
+      function getLangTag(lang) {
+        const map = {
+          JavaScript: "tag-js",
+          React: "tag-react",
+          CSS: "tag-css",
+          "Node.js": "tag-node",
+        };
+        return map[lang] || "tag-default";
+      }
+
+      // ===== NAV =====
+      function switchTab(tab) {
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((t) => t.classList.remove("active"));
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((n) => n.classList.remove("active"));
+        document.getElementById("tab-" + tab).classList.add("active");
+        document.querySelectorAll(".nav-item").forEach((n) => {
+          if (n.textContent.toLowerCase().includes(tab))
+            n.classList.add("active");
+        });
+        const titles = {
+          dashboard: "⚡ <span>Dashboard</span>",
+          snippets: "📦 <span>Snippets</span>",
+          quiz: "🧠 <span>Quiz</span>",
+          habits: "🔥 <span>Habits</span>",
+          docs: "📖 <span>Docs</span>",
+          playground: "🎮 <span>Playground</span>",
+        };
+        document.getElementById("pageTitle").innerHTML = titles[tab];
+        if (tab === "snippets") loadSnippets();
+        if (tab === "habits") loadHabits();
+        if (tab === "quiz") loadQuizTopics();
+        if (tab === "docs") loadDocsLangs();
+      }
+
+      // ===== CLOCK =====
+      function updateClock() {
+        const now = new Date();
+        document.getElementById("currentTime").textContent =
+          now.toLocaleTimeString("en-US", { hour12: false }) +
+          " — " +
+          now.toLocaleDateString("en-US", {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+          });
+      }
+      setInterval(updateClock, 1000);
+      updateClock();
+
+      // ===== SNIPPETS =====
+      async function loadSnippets() {
+        try {
+          const res = await fetch("/api/snippets");
+          const snippets = await res.json();
+          renderSnippets(snippets);
+          document.getElementById("stat-snippets").textContent =
+            snippets.length;
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      function renderSnippets(snippets) {
+        const el = document.getElementById("snippetsList");
+        if (!snippets.length) {
+          el.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📦</div><div class="empty-text">No snippets yet</div><div class="empty-sub">Save your first code snippet!</div></div>`;
+          return;
+        }
+        el.innerHTML = snippets
+          .map(
+            (s) => `
+      <div class="snippet-card">
+        <div class="snippet-header">
+          <span class="snippet-title">${s.title}</span>
+          <span class="tag ${getLangTag(s.language)}">${s.language}</span>
+        </div>
+        <div class="snippet-code">${escHtml(s.code)}</div>
+        <div class="snippet-footer">
+          <div class="flex gap-2 flex-wrap">
+            ${(s.tags || []).map((t) => `<span class="tag tag-default">${t}</span>`).join("")}
+          </div>
+          <div class="flex gap-2">
+            <button class="btn btn-ghost btn-sm" onclick="copySnippet('${escAttr(s.code)}')">Copy</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteSnippet('${s._id}')">Del</button>
+          </div>
+        </div>
+      </div>
+    `,
+          )
+          .join("");
+      }
+
+      function filterSnippets() {
+        const q = document.getElementById("searchSnippets").value.toLowerCase();
+        const lang = document.getElementById("filterLang").value;
+        fetch("/api/snippets")
+          .then((r) => r.json())
+          .then((snippets) => {
+            let filtered = snippets.filter((s) => {
+              const matchQ =
+                !q ||
+                s.title.toLowerCase().includes(q) ||
+                s.code.toLowerCase().includes(q);
+              const matchL = !lang || s.language === lang;
+              return matchQ && matchL;
+            });
+            renderSnippets(filtered);
+          });
+      }
+
+      function openSnippetModal() {
+        document.getElementById("snippetModal").classList.add("open");
+      }
+
+      function closeSnippetModal() {
+        document.getElementById("snippetModal").classList.remove("open");
+        ["snippetTitle", "snippetCode", "snippetTags"].forEach(
+          (id) => (document.getElementById(id).value = ""),
+        );
+      }
+
+      async function saveSnippet() {
+        const title = document.getElementById("snippetTitle").value.trim();
+        const code = document.getElementById("snippetCode").value.trim();
+        const language = document.getElementById("snippetLang").value;
+        const tags = document
+          .getElementById("snippetTags")
+          .value.split(",")
+          .map((t) => t.trim())
+          .filter(Boolean);
+        if (!title || !code) return showToast("⚠️ Title and code required");
+        await fetch("/api/snippets", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, code, language, tags }),
+        });
+        closeSnippetModal();
+        loadSnippets();
+        showToast("✅ Snippet saved!");
+      }
+
+      async function deleteSnippet(id) {
+        await fetch("/api/snippets/" + id, { method: "DELETE" });
+        loadSnippets();
+        showToast("🗑️ Deleted");
+      }
+
+      function copySnippet(code) {
+        navigator.clipboard.writeText(code);
+        showToast("📋 Copied!");
+      }
+
+      // ===== QUIZ =====
+      async function loadQuizTopics() {
+        const res = await fetch("/api/quiz");
+        const topics = await res.json();
+        document.getElementById("topicButtons").innerHTML = ["all", ...topics]
+          .map(
+            (t) => `
+      <button class="quiz-topic-btn" onclick="startQuiz('${t}')">${t === "all" ? "🎯 All Topics" : t}</button>
+    `,
+          )
+          .join("");
+      }
+
+      async function startQuiz(topic) {
+        const res = await fetch("/api/quiz/" + topic);
+        quizQuestions = await res.json();
+        quizQuestions = quizQuestions.sort(() => Math.random() - 0.5);
+        currentQ = 0;
+        score = 0;
+        document.getElementById("quizTopicSelect").style.display = "none";
+        document.getElementById("quizArea").style.display = "block";
+        document.getElementById("quizTotal").textContent = quizQuestions.length;
+        renderQuestion();
+      }
+
+      function renderQuestion() {
+        if (currentQ >= quizQuestions.length) return showResults();
+        answered = false;
+        const q = quizQuestions[currentQ];
+        document.getElementById("quizScore").textContent = score;
+        document.getElementById("nextBtn").style.display = "none";
+        document.getElementById("questionCard").innerHTML = `
+      <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text3);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">
+        Question ${currentQ + 1} of ${quizQuestions.length} · ${q.topic}
+      </div>
+      <div class="question-text">${q.question}</div>
+      ${q.options
+        .map(
+          (opt, i) => `
+        <button class="option-btn" id="opt-${i}" onclick="selectAnswer(${i}, ${q.answer})">${opt}</button>
+      `,
+        )
+        .join("")}
+    `;
+      }
+
+      function selectAnswer(selected, correct) {
+        if (answered) return;
+        answered = true;
+        if (selected === correct) score++;
+        document.querySelectorAll(".option-btn").forEach((btn, i) => {
+          btn.disabled = true;
+          if (i === correct) btn.classList.add("correct");
+          if (i === selected && selected !== correct)
+            btn.classList.add("wrong");
+        });
+        document.getElementById("quizScore").textContent = score;
+        document.getElementById("nextBtn").style.display = "inline-block";
+      }
+
+      function nextQuestion() {
+        currentQ++;
+        renderQuestion();
+      }
+
+      function showResults() {
+        const pct = Math.round((score / quizQuestions.length) * 100);
+        document.getElementById("stat-score").textContent = pct + "%";
+        document.getElementById("questionCard").innerHTML = `
+      <div style="text-align:center;padding:40px">
+        <div style="font-size:64px;margin-bottom:16px">${pct >= 70 ? "🏆" : pct >= 40 ? "👍" : "💪"}</div>
+        <div style="font-size:32px;font-weight:800;color:var(--accent)">${pct}%</div>
+        <div style="font-size:16px;color:var(--text2);margin-top:8px">You got ${score} out of ${quizQuestions.length} correct</div>
+        <button class="btn btn-primary" style="margin-top:24px" onclick="resetQuiz()">Try Again</button>
+      </div>
+    `;
+        document.getElementById("nextBtn").style.display = "none";
+      }
+
+      function resetQuiz() {
+        document.getElementById("quizTopicSelect").style.display = "block";
+        document.getElementById("quizArea").style.display = "none";
+      }
+
+      // ===== HABITS =====
+      async function loadHabits() {
+        const res = await fetch("/api/habits");
+        const habits = await res.json();
+        document.getElementById("stat-habits").textContent = habits.length;
+        const today = new Date().toDateString();
+
+        document.getElementById("habitsList").innerHTML = habits.length
+          ? habits
+              .map((h) => {
+                const doneToday =
+                  h.completedDates && h.completedDates.includes(today);
+                return `
+      <div class="habit-row">
+        <div>
+          <div class="habit-name">${h.name}</div>
+          <div class="habit-freq">${h.frequency}</div>
+        </div>
+        <div class="flex gap-2 items-center">
+          <span class="streak-badge ${doneToday ? "done-badge" : ""}">🔥 ${h.streak}</span>
+          ${!doneToday ? `<button class="btn btn-primary btn-sm" onclick="completeHabit('${h._id}')">Done</button>` : '<span style="font-size:11px;color:var(--accent)">✓ Today</span>'}
+          <button class="btn btn-danger btn-sm" onclick="deleteHabit('${h._id}')">×</button>
+        </div>
+      </div>`;
+              })
+              .join("")
+          : `<div class="empty-state"><div class="empty-icon">🔥</div><div class="empty-text">No habits yet</div><div class="empty-sub">Add your first habit!</div></div>`;
+
+        // Dashboard habits
+        document.getElementById("dashHabits").innerHTML = habits.length
+          ? habits
+              .slice(0, 4)
+              .map((h) => {
+                const done =
+                  h.completedDates && h.completedDates.includes(today);
+                return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:13px">${h.name}</span>
+        <span style="font-size:11px;color:${done ? "var(--accent)" : "var(--text3)"}">${done ? "✓ Done" : "Pending"}</span>
+      </div>`;
+              })
+              .join("")
+          : `<div class="empty-state" style="padding:20px"><div class="empty-icon">🔥</div><div class="empty-text">No habits</div></div>`;
+      }
+
+      async function addHabit() {
+        const name = document.getElementById("habitName").value.trim();
+        const frequency = document.getElementById("habitFreq").value;
+        if (!name) return showToast("⚠️ Enter habit name");
+        await fetch("/api/habits", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, frequency }),
+        });
+        document.getElementById("habitName").value = "";
+        loadHabits();
+        showToast("✅ Habit added!");
+      }
+
+      async function completeHabit(id) {
+        await fetch("/api/habits/" + id + "/complete", { method: "PATCH" });
+        loadHabits();
+        showToast("🔥 Streak updated!");
+      }
+
+      async function deleteHabit(id) {
+        await fetch("/api/habits/" + id, { method: "DELETE" });
+        loadHabits();
+        showToast("🗑️ Habit removed");
+      }
+
+      // ===== DOCS =====
+      async function loadDocsLangs() {
+        const res = await fetch("/api/docs");
+        const langs = await res.json();
+        document.getElementById("docsLangList").innerHTML = langs
+          .map(
+            (l) => `
+      <button class="docs-lang-btn" onclick="loadDocs('${l}')">${l}</button>
+    `,
+          )
+          .join("");
+      }
+
+      async function loadDocs(lang) {
+        document
+          .querySelectorAll(".docs-lang-btn")
+          .forEach((b) => b.classList.remove("active"));
+        event.target.classList.add("active");
+        const res = await fetch("/api/docs/" + lang);
+        const docs = await res.json();
+        document.getElementById("docsContent").innerHTML = docs
+          .map(
+            (d) => `
+      <div class="doc-item">
+        <div class="doc-item-title">${d.title}</div>
+        <div class="doc-item-content">${d.content}</div>
+      </div>
+    `,
+          )
+          .join("");
+      }
+
+      // ===== PLAYGROUND =====
+      function runCode() {
+        const code = document.getElementById("codeEditor").value;
+        const lang = document.getElementById("playgroundLang").value;
+        const frame = document.getElementById("outputFrame");
+        if (lang === "html") {
+          frame.srcdoc = code;
+        } else {
+          frame.srcdoc = `<html><body style="background:#111;color:#0f0;font-family:monospace;padding:16px"><script>
+        const log = console.log;
+        const out = [];
+        console.log = (...a) => { out.push(a.join(' ')); log(...a); };
+        try { ${code} } catch(e) { out.push('Error: ' + e.message); }
+        document.body.innerHTML = '<pre>' + out.join('\\n') + '</pre>';
+      <\/script></body></html>`;
+        }
+      }
+
+      function clearPlayground() {
+        document.getElementById("codeEditor").value = "";
+        document.getElementById("outputFrame").srcdoc = "";
+      }
+
+      function updatePlayground() {
+        const lang = document.getElementById("playgroundLang").value;
+        document.getElementById("langLabel").textContent = lang.toUpperCase();
+      }
+
+      // ===== HELPERS =====
+      function escHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+      function escAttr(str) {
+        return String(str).replace(/'/g, "\\'").replace(/\n/g, "\\n");
+      }
+
+      // ===== INIT =====
+      loadSnippets();
+      loadHabits();
+    </script>
+  </body>
+</html>

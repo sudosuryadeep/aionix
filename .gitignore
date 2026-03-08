@@ -1,0 +1,9 @@
+node_modules
+dist
+
+# Ignore log files
+logs
+*.log
+# Ignore database files
+*.db
+
