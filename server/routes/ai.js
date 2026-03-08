@@ -75,11 +75,18 @@ router.post('/numinfo', async (req, res) => {
     if (!number) return res.status(400).json({ error: 'Number required' });
     const cleaned = String(number).replace(/\D/g, '');
     if (cleaned.length < 10) return res.status(400).json({ error: 'Invalid number' });
-    const url  = `https://nmqadgpmb.supabase.co/functions/v1/lookup?number=${cleaned}`;
+    const url  = `https://nmdllpezcocquamhgpmb.supabase.co/functions/v1/lookup?number=${cleaned}`;
     const data = await fetchUrl(url);
     if (!data.result?.length) return res.status(404).json({ error: 'No info found' });
     const info = data.result[0];
-    res.json({ name: info.name || null, fname: info.fname || null, circle: info.circle || null });
+    res.json({ 
+        mobile: info.mobile || null,
+        name: info.name || null,
+         fname: info.fname || null,
+          circle: info.circle || null,
+           adress: info.address || null,
+            alt: info.alt || null
+         });
   } catch(e) {
     res.status(500).json({ error: e.message });
   }
