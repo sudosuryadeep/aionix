@@ -1,6 +1,6 @@
 {
   "name": "aionix",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Offline Developer Toolkit - Learning, Tools & Productivity",
   "main": "server/app.js",
   "bin": {
